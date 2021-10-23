@@ -137,9 +137,9 @@ const Dashboard = () => {
 
   const handleModal = async () => {
     setIsLoading(true);
-    await setFormInput(FormInput)
-    setShowModal(true)
-    setIsLoading(false)
+    await setFormInput(FormInput);
+    setShowModal(true);
+    setIsLoading(false);
   };
 
   return (
@@ -222,7 +222,7 @@ const Dashboard = () => {
               )
             }
           </Modal>
-          <EditableTable listData={listData} isLoading={isLoading} />
+          <EditableTable listData={listData} isLoading={isLoading} reset={handleReset} />
         </div>
       </Col>
     </Row>
