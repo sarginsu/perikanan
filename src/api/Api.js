@@ -19,7 +19,9 @@ export async function getList() {
 
 export async function searchList(filter) {
   try {
-    return await store.read("list", { search: filter });
+    let list = await store.read("list", { search: filter });
+    list = list.filter(item => item.uuid);
+    return list;
   } catch (error) {
     return error;
   }

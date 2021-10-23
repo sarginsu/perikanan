@@ -1,63 +1,53 @@
 import React, { useEffect } from 'react';
 import Highcharts from 'highcharts';
 
-const LineChart = (props) => {
-  const { container, data } = props;
+const LineChart = ({
+  container, data
+}) => {
 
   useEffect(() => {
     const getChart = () => {
-      Highcharts.chart('container', {
+      const categories = [];
+      const dataPrice = [];
+      const limit = data.length > 10 ? 10 : data.length;
+      for (let i = 0; i < limit; i++) {
+        const { komoditas, price } = data[i];
+        categories.push(komoditas);
+        dataPrice.push(parseInt(price));
+      }
+
+      Highcharts.chart(container, {
         chart: {
-          zoomType: 'x'
+          type: 'column'
         },
         title: false,
-        subtitle: {
-          text: document.ontouchstart === undefined ?
-            'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
-        },
         xAxis: {
-          type: 'datetime'
+          categories: categories,
+          crosshair: true
         },
         yAxis: {
+          min: 0,
           title: {
-            text: 'Revenue'
+            text: 'Harga (Rp)'
           }
         },
-        legend: {
-          enabled: false
+        tooltip: {
+          headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+          pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style="padding:0"><b>RP {point.y:.1f}</b></td></tr>',
+          footerFormat: '</table>',
+          shared: true,
+          useHTML: true
         },
         plotOptions: {
-          area: {
-            fillColor: {
-              linearGradient: {
-                x1: 0,
-                y1: 0,
-                x2: 0,
-                y2: 1
-              },
-              stops: [
-                [0, '#789764'],
-                [1, Highcharts.color('#789764').setOpacity(0).get('rgba')]
-              ]
-            },
-            marker: {
-              radius: 2
-            },
-            lineWidth: 1,
-            states: {
-              hover: {
-                lineWidth: 1
-              }
-            },
-            threshold: null
+          column: {
+            pointPadding: 0.2,
+            borderWidth: 0
           }
         },
-
         series: [{
-          type: 'area',
-          name: 'Revenue',
-          color: '#789764',
-          data: data
+          name: 'Komoditas',
+          data: dataPrice
         }]
       });
     }
@@ -66,7 +56,7 @@ const LineChart = (props) => {
 
   return (
     <figure className="highcharts-figure">
-      <div id="container"></div>
+      <div id={container}></div>
     </figure>
   )
 };

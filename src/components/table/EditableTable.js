@@ -26,7 +26,7 @@ const EditableCell = ({
           rules={[
             {
               required: true,
-              message: `Please Input ${title}!`,
+              message: `Silahkan Input ${title}!`,
             },
           ]}
         >
@@ -69,8 +69,7 @@ const EditableTable = ({
     setTableLoading(true);
     try {
       await deleteRow(id);
-      let listData = await getList();
-      listData = listData.filter(item => item.uuid);
+      const listData = await getList();
       setData(listData);
       notification['success']({
         message: 'Hapus data sukses!',
@@ -86,13 +85,13 @@ const EditableTable = ({
   const handleSaveEdit = async (record) => {
     setTableLoading(true);
     try {
-      const row = await form.validateFields();
+      let row = await form.validateFields();
+      row.komoditas = row.komoditas.toUpperCase();
       let newData = { ...record, ...row };
 
       await editRow(newData.uuid, newData);
-      let listHarga = await getList();
-      listHarga = listHarga.filter(item => item.uuid);
-      setData(listHarga);
+      const listData = await getList();
+      setData(listData);
       notification['success']({
         message: 'Edit data sukses!',
         description: `${newData.komoditas} berhasil di edit.`,
@@ -151,12 +150,12 @@ const EditableTable = ({
       key: 'tgl_parsed',
       sorter: (a, b) => SortStringDate(a.tgl_parsed, b.tgl_parsed),
       render: tgl_parsed => (
-        moment(tgl_parsed).format('DD MMM YYYY HH:mm')
+        moment(tgl_parsed).format('DD MMM YYYY - HH:mm')
       ),
       responsive: ['lg']
     },
     {
-      title: 'aksi',
+      title: 'Aksi',
       dataIndex: 'aksi',
       align: 'center',
       render: (_, record) => {

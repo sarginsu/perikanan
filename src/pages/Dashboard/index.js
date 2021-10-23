@@ -13,6 +13,8 @@ import JsonToForm from 'json-reactform';
 import FormInput from '../../components/form/FormInput';
 import FormFilter from '../../components/form/FormFilter';
 import EditableTable from '../../components/table/EditableTable';
+import PieChart from '../../components/charts/PieChart';
+import LineChart from '../../components/charts/LineChart';
 
 const Dashboard = () => {
   const [listData, setListData] = useState();
@@ -20,6 +22,7 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [formInput, setFormInput] = useState(FormInput);
   const [formFilter, setFormFilter] = useState(FormFilter);
+  const [listProvince, setListProvince] = useState();
 
   useEffect(() => {
     setIsLoading(true);
@@ -27,21 +30,25 @@ const Dashboard = () => {
       try {
         let listData = await getList();
         setListData(listData);
-
         const listSize = await getSize();
         const listArea = await getArea();
-
         const arrSize = listSize.map(val => {
           return { value: val.size, label: val.size }
         })
 
         let arrKota = [];
         let arrProvinsi = [];
+        let tempProvinsi = [];
         listArea.forEach(val => {
           const kota = { value: val.city, label: val.city };
-          const provinsi = { value: val.province, label: val.province };
           arrKota = [...arrKota, kota];
-          arrProvinsi = [...arrProvinsi, provinsi];
+
+          const provinsi = { value: val.province, label: val.province };
+          const index = tempProvinsi.indexOf(val.province);
+          if (index === -1) {
+            arrProvinsi = [...arrProvinsi, provinsi];
+            tempProvinsi = [...tempProvinsi, val.province];
+          }
         });
 
         const { area_kota, size } = FormInput;
@@ -49,10 +56,12 @@ const Dashboard = () => {
         size.options = arrSize;
         setFormInput(FormInput);
 
-        FormFilter.Kota.options = arrKota;
-        FormFilter.Provinsi.options = arrProvinsi;
-        FormFilter.Ukuran.options = arrSize;
+        const { Kota, Provinsi, Ukuran } = FormFilter;
+        Kota.options = arrKota;
+        Provinsi.options = arrProvinsi;
+        Ukuran.options = arrSize;
         setFormFilter(FormFilter);
+        setListProvince(tempProvinsi);
       } catch (error) {
         console.log(error.message);
       } finally {
@@ -73,7 +82,7 @@ const Dashboard = () => {
     const [area] = listProvince.filter(item => item.city === area_kota.value);
     const newData = {
       uuid: uuidHelper(),
-      komoditas: data.komoditas,
+      komoditas: data.komoditas.toUpperCase(),
       price: data.price,
       area_kota: area_kota.value,
       area_provinsi: area.province,
@@ -100,7 +109,7 @@ const Dashboard = () => {
   const handleSearch = async (data) => {
     try {
       const filter = {
-        komoditas: data.Komoditas || undefined,
+        komoditas: data.Komoditas.toUpperCase() || undefined,
         price: data.Harga || undefined,
         area_provinsi: data.Provinsi.value || undefined,
         area_kota: data.Kota.value || undefined,
@@ -116,15 +125,7 @@ const Dashboard = () => {
   const handleReset = async () => {
     setIsLoading(true);
     try {
-      const newFormFilter = formFilter;
-      const { Komoditas, Harga, Provinsi, Kota, Ukuran } = newFormFilter;
-      delete Komoditas.defaultValue;
-      delete Harga.defaultValue;
-      delete Provinsi.defaultValue;
-      delete Kota.defaultValue;
-      delete Ukuran.defaultValue;
-      setFormFilter(newFormFilter)
-
+      setFormFilter(FormFilter)
       const listData = await getList();
       setListData(listData);
     } catch (error) {
@@ -134,8 +135,47 @@ const Dashboard = () => {
     }
   };
 
+  const handleModal = async () => {
+    setIsLoading(true);
+    await setFormInput(FormInput)
+    setShowModal(true)
+    setIsLoading(false)
+  };
+
   return (
     <Row className="content">
+      <Col xs={24} md={24} xl={12}>
+        <div className="widget">
+          <span className="top-title">
+            Data Berdasarkan Provinsi
+          </span>
+          {
+            !isLoading ? (
+              <PieChart container="chart1" data={listData} province={listProvince} />
+            ) : (
+              <div style={{ textAlign: 'center' }}>
+                <Spin />
+              </div>
+            )
+          }
+        </div>
+      </Col>
+      <Col xs={24} md={24} xl={12}>
+        <div className="widget">
+          <span className="top-title">
+            Harga Komoditas
+          </span>
+          {
+            !isLoading ? (
+              <LineChart container="chart2" data={listData} province={listProvince} />
+            ) : (
+              <div style={{ textAlign: 'center' }}>
+                <Spin />
+              </div>
+            )
+          }
+        </div>
+      </Col>
       <Col xs={24} md={24} xl={6}>
         <div className="widget">
           <div className="top-title">
@@ -164,7 +204,7 @@ const Dashboard = () => {
           </span>
           <Button
             loading={isLoading}
-            onClick={() => setShowModal(true)}
+            onClick={handleModal}
             style={{ background: '#28a745', borderRadius: 4, borderColor: '#28a745', marginBottom: 20 }}
             type="primary">
             Tambah Data {showModal}
@@ -176,7 +216,11 @@ const Dashboard = () => {
             footer={null}
             onCancel={() => setShowModal(false)}
           >
-            <JsonToForm model={formInput} onSubmit={handleSubmit} />
+            {
+              !isLoading && (
+                <JsonToForm model={formInput} onSubmit={handleSubmit} />
+              )
+            }
           </Modal>
           <EditableTable listData={listData} isLoading={isLoading} />
         </div>

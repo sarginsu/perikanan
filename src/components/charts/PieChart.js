@@ -1,11 +1,33 @@
 import React, { useEffect } from 'react';
 import Highcharts from 'highcharts';
 
-const PieChart = (props) => {
-  const { container, data } = props;
-
+const PieChart = ({
+  container, data, province
+}) => {
   useEffect(() => {
     const getChart = () => {
+      let arrProvinsi = [];
+      let tempProvinsi = [];
+      data.forEach(val => {
+        const { area_provinsi } = val;
+        arrProvinsi.push(area_provinsi);
+
+        const index = tempProvinsi.indexOf(area_provinsi);
+        if (index === -1) {
+          tempProvinsi.push(area_provinsi);
+        }
+      });
+
+      let dataChart = [];
+      tempProvinsi.forEach(val => {
+        const total = arrProvinsi.filter(item => item === val);
+        const temp = {
+          name: val,
+          y: parseInt(total.length)
+        }
+        dataChart.push(temp);
+      });
+
       Highcharts.chart(container, {
         chart: {
           plotBackgroundColor: null,
@@ -32,11 +54,15 @@ const PieChart = (props) => {
             showInLegend: true
           }
         },
-        series: data
+        series: [{
+          name: 'Provinsi',
+          colorByPoint: true,
+          data: dataChart
+        }]
       });
     };
     getChart();
-  }, [container, data]);
+  }, [container, data, province]);
 
   return (
     <figure className="highcharts-figure">
