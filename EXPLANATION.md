@@ -12,7 +12,7 @@ Data komoditas dan harga bisa langsung di edit melalui tabel dengan cara klik to
 
 Setelah melakukan input data, edit dan `Hapus`. `Notification` akan muncul di bagian kanan atas. Diharapkan dengan fitur ini akan lebih informatif.
 
-Pada dashboad juga di tampilkan 2 `Chart` untuk memudahkan user menganalisa data.
+Pada dashboad juga di tampilkan 2 `Chart` untuk memudahkan user menganalisa data. Chart pertama menampilkan data berdasarkan provinsi dan yang kedua menampilkan komoditas dengan harganya.
 
 #### Info Tambahan
 - github: `https://github.com/sarginsu/perikanan`
