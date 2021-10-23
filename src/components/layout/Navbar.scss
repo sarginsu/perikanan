@@ -1,0 +1,30 @@
+.top-menu {
+  left: 0px;
+  top: 0px;
+  border-radius: 0px;
+}
+
+.top-bar {
+  min-height: 88px;
+  left: 0px;
+  top: 0px;
+  border-radius: 0px;
+  background: rgba(40, 183, 150, 0.95);
+  padding: 28px 28px 28px 16px;
+}
+
+.sub-menu {
+  min-height: 56px;
+  left: 0px;
+  top: 88px;
+  border-radius: 0px;
+  padding: 20px 16px 20px;
+  text-align: right;
+}
+
+.text-date {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px; 
+}
