@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button, notification } from 'antd';
 import { SortString, SortStringDate, SortNumber } from '../../helpers/SortHelper';
-import { editRow, getList, deleteRow } from '../../api/Api';
+import { editRow, deleteRow } from '../../api/Api';
 import moment from 'moment';
 
 const EditableCell = ({
@@ -41,7 +41,8 @@ const EditableCell = ({
 
 const EditableTable = ({
   listData,
-  isLoading
+  isLoading,
+  reset
 }) => {
   const [form] = Form.useForm();
   const [data, setData] = useState();
@@ -69,12 +70,11 @@ const EditableTable = ({
     setTableLoading(true);
     try {
       await deleteRow(id);
-      const listData = await getList();
-      setData(listData);
       notification['success']({
         message: 'Hapus data sukses!',
         description: `Uuid ${id} berhasil di hapus.`,
       });
+      reset();
     } catch (error) {
       console.log(error);
     } finally {
@@ -90,12 +90,11 @@ const EditableTable = ({
       let newData = { ...record, ...row };
 
       await editRow(newData.uuid, newData);
-      const listData = await getList();
-      setData(listData);
       notification['success']({
         message: 'Edit data sukses!',
         description: `${newData.komoditas} berhasil di edit.`,
       });
+      reset();
     } catch (errInfo) {
       console.log(errInfo);
     } finally {
