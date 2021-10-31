@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { Table, Input, InputNumber, Popconfirm, Form, Typography, Button, notification } from 'antd';
 import { SortString, SortStringDate, SortNumber } from '../../helpers/SortHelper';
 import { editRow, deleteRow } from '../../api/Api';
 import moment from 'moment';
+import { MyContext } from "../../pages/Dashboard/index.js";
 
 const EditableCell = ({
   editing,
@@ -40,18 +41,13 @@ const EditableCell = ({
 };
 
 const EditableTable = ({
-  listData,
   isLoading,
   reset
 }) => {
   const [form] = Form.useForm();
-  const [data, setData] = useState();
   const [editingKey, setEditingKey] = useState('');
   const [tableLoading, setTableLoading] = useState(false);
-
-  useEffect(() => {
-    setData(listData);
-  }, [listData]);
+  const data = useContext(MyContext);
 
   const isEditing = (record) => record.uuid === editingKey;
 

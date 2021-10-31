@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import { Row, Col, Button, Modal, Spin, notification } from 'antd';
 import './index.scss';
 import uuidHelper from '../../helpers/UuidHelper';
@@ -16,13 +16,17 @@ import EditableTable from '../../components/table/EditableTable';
 import PieChart from '../../components/charts/PieChart';
 import LineChart from '../../components/charts/LineChart';
 
+export const MyContext = createContext();
+
 const Dashboard = () => {
   const [listData, setListData] = useState();
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingForm, setIsLoadingForm] = useState();
   const [showModal, setShowModal] = useState(false);
   const [formInput, setFormInput] = useState(FormInput);
   const [formFilter, setFormFilter] = useState(FormFilter);
   const [listProvince, setListProvince] = useState();
+  const [fullArea, setFullArea] = useState();
 
   useEffect(() => {
     setIsLoading(true);
@@ -62,6 +66,7 @@ const Dashboard = () => {
         Ukuran.options = arrSize;
         setFormFilter(FormFilter);
         setListProvince(tempProvinsi);
+        setFullArea(listArea);
       } catch (error) {
         console.log(error.message);
       } finally {
@@ -75,11 +80,8 @@ const Dashboard = () => {
   const handleSubmit = async (data) => {
     setShowModal(false);
     setIsLoading(true);
-    const listProvince = JSON.parse(
-      localStorage.getItem('listProvince')
-    );
     const { area_kota, size } = data;
-    const [area] = listProvince.filter(item => item.city === area_kota.value);
+    const [area] = fullArea.filter(item => item.city === area_kota.value);
     const newData = {
       uuid: uuidHelper(),
       komoditas: data.komoditas.toUpperCase(),
@@ -136,96 +138,98 @@ const Dashboard = () => {
   };
 
   const handleModal = async () => {
-    setIsLoading(true);
+    setIsLoadingForm(true);
     await setFormInput(FormInput);
     setShowModal(true);
-    setIsLoading(false);
+    setIsLoadingForm(false);
   };
 
   return (
-    <Row className="content">
-      <Col xs={24} md={24} xl={12}>
-        <div className="widget">
-          <span className="top-title">
-            Data Berdasarkan Provinsi
-          </span>
-          {
-            !isLoading ? (
-              <PieChart container="chart1" data={listData} province={listProvince} />
-            ) : (
-              <div style={{ textAlign: 'center' }}>
-                <Spin />
-              </div>
-            )
-          }
-        </div>
-      </Col>
-      <Col xs={24} md={24} xl={12}>
-        <div className="widget">
-          <span className="top-title">
-            Harga Komoditas
-          </span>
-          {
-            !isLoading ? (
-              <LineChart container="chart2" data={listData} province={listProvince} />
-            ) : (
-              <div style={{ textAlign: 'center' }}>
-                <Spin />
-              </div>
-            )
-          }
-        </div>
-      </Col>
-      <Col xs={24} md={24} xl={6}>
-        <div className="widget">
-          <div className="top-title">
-            Pencarian
-          </div>
-          {
-            !isLoading ? (
-              <>
-                <JsonToForm model={formFilter} onSubmit={handleSearch} />
-                <Button onClick={handleReset} size="small">
-                  Reset
-                </Button>
-              </>
-            ) : (
-              <div style={{ textAlign: 'center' }}>
-                <Spin />
-              </div>
-            )
-          }
-        </div>
-      </Col>
-      <Col xs={24} md={24} xl={18}>
-        <div className="widget-no-border">
-          <span className="top-title">
-            Harga Komiditas Ikan
-          </span>
-          <Button
-            loading={isLoading}
-            onClick={handleModal}
-            style={{ background: '#28a745', borderRadius: 4, borderColor: '#28a745', marginBottom: 20 }}
-            type="primary">
-            Tambah Data {showModal}
-          </Button>
-          <Modal
-            title="Form Input Harga Komoditas"
-            centered
-            visible={showModal}
-            footer={null}
-            onCancel={() => setShowModal(false)}
-          >
+    <MyContext.Provider value={listData}>
+      <Row className="content">
+        <Col xs={24} md={24} xl={12}>
+          <div className="widget">
+            <span className="top-title">
+              Data Berdasarkan Provinsi
+            </span>
             {
-              !isLoading && (
-                <JsonToForm model={formInput} onSubmit={handleSubmit} />
+              !isLoading ? (
+                <PieChart container="chart1" province={listProvince} />
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <Spin />
+                </div>
               )
             }
-          </Modal>
-          <EditableTable listData={listData} isLoading={isLoading} reset={handleReset} />
-        </div>
-      </Col>
-    </Row>
+          </div>
+        </Col>
+        <Col xs={24} md={24} xl={12}>
+          <div className="widget">
+            <span className="top-title">
+              Harga Komoditas
+            </span>
+            {
+              !isLoading ? (
+                <LineChart container="chart2" province={listProvince} />
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <Spin />
+                </div>
+              )
+            }
+          </div>
+        </Col>
+        <Col xs={24} md={24} xl={6}>
+          <div className="widget">
+            <div className="top-title">
+              Pencarian
+            </div>
+            {
+              !isLoading ? (
+                <>
+                  <JsonToForm model={formFilter} onSubmit={handleSearch} />
+                  <Button onClick={handleReset} size="small">
+                    Reset
+                  </Button>
+                </>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <Spin />
+                </div>
+              )
+            }
+          </div>
+        </Col>
+        <Col xs={24} md={24} xl={18}>
+          <div className="widget-no-border">
+            <span className="top-title">
+              Harga Komiditas Ikan
+            </span>
+            <Button
+              loading={isLoading}
+              onClick={handleModal}
+              style={{ background: '#28a745', borderRadius: 4, borderColor: '#28a745', marginBottom: 20 }}
+              type="primary">
+              Tambah Data {showModal}
+            </Button>
+            <Modal
+              title="Form Input Harga Komoditas"
+              centered
+              visible={showModal}
+              footer={null}
+              onCancel={() => setShowModal(false)}
+            >
+              {
+                !isLoadingForm && (
+                  <JsonToForm model={formInput} onSubmit={handleSubmit} />
+                )
+              }
+            </Modal>
+            <EditableTable isLoading={isLoading} reset={handleReset} />
+          </div>
+        </Col>
+      </Row>
+    </MyContext.Provider>
   )
 };
 

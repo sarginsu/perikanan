@@ -1,9 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import Highcharts from 'highcharts';
 
+import { MyContext } from "../../pages/Dashboard/index.js";
+
 const PieChart = ({
-  container, data, province
+  container, province
 }) => {
+  const data = useContext(MyContext);
+
   useEffect(() => {
     const getChart = () => {
       let arrProvinsi = [];
