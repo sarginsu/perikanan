@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import Highcharts from 'highcharts';
+import { MyContext } from "../../pages/Dashboard/index.js";
 
 const LineChart = ({
-  container, data
+  container
 }) => {
+  const data = useContext(MyContext);
 
   useEffect(() => {
     const getChart = () => {
